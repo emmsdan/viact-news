@@ -1,57 +1,64 @@
-import React from 'react';
-import logo from './logo.svg';
-import { Counter } from './features/counter/Counter';
-import './App.css';
+import React from "react";
+import SearchField from "./shared/components/SearchField";
+import NewsIndex from "./features/news";
+import Pagination from "@material-ui/lab/Pagination";
+import {
+  AppBar,
+  Container,
+  IconButton,
+  Toolbar,
+  Typography,
+} from "@material-ui/core";
+import MenuIcon from "@material-ui/icons/Menu";
+import { GridRowModel } from "@material-ui/data-grid";
+import ViewNews from "./features/news/ViewNews";
+import { useAppDispatch } from "./store/hooks";
+import { viewNews } from "./features/news/slice";
 
 function App() {
+  const dispatch = useAppDispatch();
+  const [page, setPage] = React.useState<number>(0);
+  const [search, setSearch] = React.useState<string>("");
+  const [openNews, setOpenNews] = React.useState<boolean | object>(false);
+
+  const onChange = (__event: object, pageNum: number) => setPage(pageNum - 1);
+  const onSearch = (search: string) => {
+    if (search) {
+      setSearch(search);
+    }
+  };
+  const onRowClick = ({ row }: GridRowModel) => {
+    setOpenNews(true);
+    dispatch(viewNews(row));
+  };
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <Counter />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <span>
-          <span>Learn </span>
-          <a
-            className="App-link"
-            href="https://reactjs.org/"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            React
-          </a>
-          <span>, </span>
-          <a
-            className="App-link"
-            href="https://redux.js.org/"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Redux
-          </a>
-          <span>, </span>
-          <a
-            className="App-link"
-            href="https://redux-toolkit.js.org/"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Redux Toolkit
-          </a>
-          ,<span> and </span>
-          <a
-            className="App-link"
-            href="https://react-redux.js.org/"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            React Redux
-          </a>
-        </span>
-      </header>
-    </div>
+    <>
+      {openNews ? <ViewNews openNews={setOpenNews} /> : null}
+      <AppBar position="static" color={"transparent"}>
+        <Toolbar>
+          <IconButton edge="start" color="inherit" aria-label="menu">
+            <MenuIcon />
+          </IconButton>
+          <Typography variant="h6">News</Typography>
+        </Toolbar>
+      </AppBar>
+      <div style={{ margin: 20 }} />
+      <Container maxWidth={"md"}>
+        <SearchField onChange={onSearch} />
+        <br /> <br />
+        <NewsIndex currentPage={page} search={search} onRowClick={onRowClick} />
+        <br />
+        <Pagination
+          defaultPage={1}
+          siblingCount={0}
+          onChange={onChange}
+          count={100 / 10}
+          variant="outlined"
+          color="primary"
+        />
+        <div style={{ margin: 20 }} />
+      </Container>
+    </>
   );
 }
 
